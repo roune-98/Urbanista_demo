@@ -482,19 +482,47 @@ footer .brand{color:var(--cream);align-items:flex-start}
   addEventListener('keydown',function(e){if(!lb.classList.contains('on'))return;
     if(e.key==='Escape')close();if(e.key==='ArrowLeft')show(cur-1);if(e.key==='ArrowRight')show(cur+1)});
 
-  // booking (demo)
+  /* ------------------------------------------------------------------
+     NUMÉRO WHATSAPP DU RESTAURANT
+     Format international, sans +, sans espace. Sénégal = 221.
+     Exemple : '221771234567'
+     Laissé vide => le formulaire affiche seulement la confirmation.
+     ------------------------------------------------------------------ */
+  var WHATSAPP='';
+
   var form=document.getElementById('form'),ok=document.getElementById('ok');
   var d=new Date();d.setDate(d.getDate()+1);
   var iso=d.toISOString().slice(0,10);form.date.value=iso;form.date.min=new Date().toISOString().slice(0,10);
+
+  if(WHATSAPP)document.querySelector('#form .btn').textContent='Envoyer sur WhatsApp';
+
   form.onsubmit=function(e){
     e.preventDefault();
     if(!form.checkValidity()){form.reportValidity();return}
     var dt=new Date(form.date.value+'T12:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+    var nom=form.nom.value.trim(),resume=form.pers.value+' pers. · '+dt+' à '+form.heure.value+' · '+form.occ.value;
+
     ok.textContent='';
     var s=document.createElement('strong');
-    s.textContent='Merci '+form.nom.value.trim()+' ! Demande notée : '+form.pers.value+' pers. · '+dt+' à '+form.heure.value+' · '+form.occ.value+'.';
     var n=document.createElement('small');
-    n.textContent='Démo : en production, la demande est envoyée au restaurant (WhatsApp ou e-mail) et confirmée au client.';
+
+    if(WHATSAPP){
+      var txt='Bonjour Urbanista ! Je souhaite réserver une table.'
+        +'\n\nNom : '+nom
+        +'\nTéléphone : '+form.tel.value.trim()
+        +'\nDate : '+dt
+        +'\nHeure : '+form.heure.value
+        +'\nPersonnes : '+form.pers.value
+        +'\nOccasion : '+form.occ.value
+        +(form.msg.value.trim()?'\nMessage : '+form.msg.value.trim():'')
+        +'\n\n(Envoyé depuis le site)';
+      window.open('https://wa.me/'+WHATSAPP+'?text='+encodeURIComponent(txt),'_blank','noopener');
+      s.textContent='Merci '+nom+' ! Votre demande est prête dans WhatsApp : '+resume+'.';
+      n.textContent='Si WhatsApp ne s’est pas ouvert, autorisez les fenêtres pop-up, ou appelez le 33 869 06 00.';
+    }else{
+      s.textContent='Merci '+nom+' ! Demande notée : '+resume+'.';
+      n.textContent='Démo : en production, la demande part sur le WhatsApp du restaurant.';
+    }
     ok.appendChild(s);ok.appendChild(n);ok.classList.add('on');
   };
 })();
